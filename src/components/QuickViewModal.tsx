@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { X, Check, ShoppingCart, ShieldCheck, Cpu, Battery, Camera, Smartphone, Heart } from 'lucide-react';
+import { X, Check, ShoppingCart, ShieldCheck, Cpu, Battery, Camera, Smartphone, Heart, Layers } from 'lucide-react';
 import { Product } from '@/types/product';
+import { useRouter } from 'next/navigation';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -19,17 +20,25 @@ export default function QuickViewModal({
   isWishlisted,
   onToggleWishlist
 }: QuickViewModalProps) {
+  const router = useRouter();
   if (!product) return null;
 
   const formatRupiah = (val: number) => 'Rp ' + val.toLocaleString('id-ID');
 
   const specsList = product.specs ? [
     { icon: Smartphone, label: 'Layar', value: product.specs.screen },
+    { icon: Layers, label: 'Memori (RAM/ROM)', value: product.specs.ramStorage },
     { icon: Cpu, label: 'Processor', value: product.specs.processor },
     { icon: Camera, label: 'Kamera', value: product.specs.camera },
     { icon: Battery, label: 'Baterai', value: product.specs.battery },
     { icon: ShieldCheck, label: 'Garansi', value: product.specs.warranty },
-  ] : [];
+  ].filter(item => Boolean(item.value)) : [];
+
+  const handleDirectBuy = () => {
+    onAddToCart(product);
+    onClose();
+    router.push(`/booking?product=${encodeURIComponent(product.id)}`);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -121,7 +130,7 @@ export default function QuickViewModal({
             </div>
 
             {/* Bottom Actions */}
-            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-3">
+            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => onToggleWishlist(product)}
@@ -141,10 +150,19 @@ export default function QuickViewModal({
                   onAddToCart(product);
                   onClose();
                 }}
-                className="flex-1 py-3 px-4 bg-[#0066FF] hover:bg-[#0052cc] text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="py-3 px-3 sm:px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                title="Simpan di keranjang"
               >
-                <ShoppingCart className="w-4 h-4 stroke-[2.2]" />
-                <span>Tambah ke Keranjang</span>
+                <ShoppingCart className="w-4 h-4 stroke-[2]" />
+                <span className="hidden sm:inline">Keranjang</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDirectBuy}
+                className="flex-1 py-3 px-4 bg-[#0066FF] hover:bg-[#0052cc] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+              >
+                <span>Beli Sekarang</span>
               </button>
             </div>
           </div>

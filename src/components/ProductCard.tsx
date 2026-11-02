@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { ShoppingCart, Heart, Eye, Check } from 'lucide-react';
 import { Product } from '@/types/product';
 
+import { useRouter } from 'next/navigation';
+
 interface ProductCardProps {
   product: Product;
   isWishlisted: boolean;
@@ -19,6 +21,7 @@ export default function ProductCard({
   onAddToCart,
   onQuickView,
 }: ProductCardProps) {
+  const router = useRouter();
   const [isBuying, setIsBuying] = useState(false);
 
   const formatRupiah = (val: number) => {
@@ -29,9 +32,8 @@ export default function ProductCard({
     e.stopPropagation();
     setIsBuying(true);
     onAddToCart(product);
-    setTimeout(() => {
-      setIsBuying(false);
-    }, 600);
+    // Langsung arahkan ke menu booking pembelian produk
+    router.push(`/booking?product=${encodeURIComponent(product.id)}`);
   };
 
   return (
@@ -105,6 +107,13 @@ export default function ProductCard({
             {product.name}
           </h3>
 
+          {/* Specs preview (RAM/Storage) */}
+          {product.specs?.ramStorage && (
+            <div className="mt-1 text-[11px] text-gray-500 font-medium truncate">
+              {product.specs.ramStorage}
+            </div>
+          )}
+
           {/* Pricing */}
           <div className="mt-1.5 flex flex-col">
             <span className="text-base sm:text-lg font-bold text-gray-950 tracking-tight leading-tight">
@@ -118,21 +127,29 @@ export default function ProductCard({
           </div>
         </div>
 
-        {/* Bottom Stock Status & Buy Button */}
+        {/* Bottom Actions: Spek & Buy Button */}
         <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between gap-1.5">
           
-          {/* Stock status */}
-          <div className="flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-emerald-600 truncate">
-            <Check className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
-            <span className="truncate">Stok: {product.stockStatus}</span>
-          </div>
+          {/* Cek Spek Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickView(product);
+            }}
+            className="px-2 sm:px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-blue-300 bg-gray-50 hover:bg-blue-50/70 text-gray-700 hover:text-[#0066FF] font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0"
+            title="Lihat Spesifikasi Lengkap"
+          >
+            <Eye className="w-3.5 h-3.5 text-[#0066FF]" />
+            <span className="text-[11px] sm:text-xs">Spek</span>
+          </button>
 
           {/* Buy Button (Sentraponsel Style) */}
           <button
             type="button"
             onClick={handleBuyClick}
             disabled={!product.inStock}
-            className={`px-2.5 sm:px-4 py-1.5 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 shadow-xs transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+            className={`px-3 sm:px-4 py-1.5 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 shadow-xs transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               isBuying
                 ? 'bg-emerald-600 text-white scale-95'
                 : 'bg-[#0066FF] hover:bg-[#0052cc] text-white active:scale-95'
